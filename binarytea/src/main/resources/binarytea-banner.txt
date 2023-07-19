@@ -1,0 +1,13 @@
+${AnsiColor.BRIGHT_YELLOW}
+  ____  _                            _____
+ | __ )(_)_ __   __ _ _ __ _   _    |_   _|__  __ _
+ |  _ \| | '_ \ / _` | '__| | | |_____| |/ _ \/ _` |
+ | |_) | | | | | (_| | |  | |_| |_____| |  __/ (_| |
+ |____/|_|_| |_|\__,_|_|   \__, |     |_|\___|\__,_|
+                           |___/
+Application Version: ${spring.application.name} (v${spring.application.version})
+Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}
+${AnsiColor.BRIGHT_GREEN}
+Welcome to Binary-Tea!
+Powered by Johann.
+${AnsiColor.DEFAULT}

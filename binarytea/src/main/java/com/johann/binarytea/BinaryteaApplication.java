@@ -1,14 +1,18 @@
 package com.johann.binarytea;
 
 import com.johann.binarytea.actuator.SalesMetrics;
+import com.johann.config.MyBanner;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,9 +50,29 @@ import java.util.Random;
 @EnableScheduling
 public class BinaryteaApplication {
 
+    /**
+     * Spring Boot应用的入口，main方法，用于启动应用程序。
+     * @param args
+     */
+//    public static void main(String[] args) {
+//        SpringApplication.run(BinaryteaApplication.class, args);
+//    }
+
+    /**
+     * 自定义SpringApplication，用于启动应用程序。
+     * @param args
+     */
     public static void main(String[] args) {
-        SpringApplication.run(BinaryteaApplication.class, args);
+        new SpringApplicationBuilder()
+                .sources(BinaryteaApplication.class)
+                .main(BinaryteaApplication.class)
+                .bannerMode(Banner.Mode.LOG)
+                //.banner(new MyBanner())
+                .web(WebApplicationType.SERVLET)
+                .run(args);
     }
+
+
 
     // http://localhost:8080/helloworld
     /**
@@ -61,19 +85,6 @@ public class BinaryteaApplication {
         log.info("Hello World!");
         return "Hello World!";
     }
-
-    /**
-     * 自定义MeterRegistry,将度量信息输出到日志中
-     * @return
-     */
-    @Bean
-    public MeterRegistry customMeterRegistry() {
-        CompositeMeterRegistry meterRegistry = new CompositeMeterRegistry();
-        meterRegistry.add(new SimpleMeterRegistry());
-        meterRegistry.add(new LoggingMeterRegistry());
-        return meterRegistry;
-    }
-
 
     private Random random = new Random();
     @Autowired
