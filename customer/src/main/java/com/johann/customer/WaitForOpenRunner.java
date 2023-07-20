@@ -21,7 +21,7 @@ import java.util.List;
  * @version 1.0
  * @see
  **/
-@Component
+//@Component
 @Slf4j
 public class WaitForOpenRunner implements ApplicationRunner, ApplicationContextAware, Ordered {
 

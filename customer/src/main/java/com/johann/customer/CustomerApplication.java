@@ -4,6 +4,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class CustomerApplication {
@@ -18,9 +19,10 @@ public class CustomerApplication {
      * @param args
      * @return
      */
+    @Bean
     public ExitCodeGenerator waitExitCodeGenerator(ApplicationArguments args){
         return () -> {
-            int wait = args.containsOption("wait") ? 0 : 0;
+            int wait = args.containsOption("wait") ? 0 : 1;
             return wait;
         };
     }
