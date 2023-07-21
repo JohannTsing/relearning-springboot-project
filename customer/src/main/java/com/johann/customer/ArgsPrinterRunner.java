@@ -33,7 +33,7 @@ public class ArgsPrinterRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.info("共传入了 {} 个参数。分别是:{}",args.length, StringUtils.arrayToCommaDelimitedString(args));
-        jdbcBasic();
+        // jdbcBasic();
     }
 
     /**
