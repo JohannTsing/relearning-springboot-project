@@ -1,4 +1,4 @@
-package com.johann.customer;
+package com.johann.customer.runner;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

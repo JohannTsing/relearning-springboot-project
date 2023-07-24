@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @version 1.0
  * @see
  **/
-@Configuration
+//@Configuration
 public class MetricsOutput {
     /**
      * 自定义MeterRegistry,将度量信息输出到日志中

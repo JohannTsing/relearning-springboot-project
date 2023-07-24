@@ -31,7 +31,7 @@ import java.util.Random;
  * 比如：根据spring-boot-starter-web，来判断你的项目是否需要添加了webmvc和tomcat，就会自动的帮你配置web项目中所需要的默认配置。
  * Spring Boot的这种做法是为了简化开发，也是符合开箱即用的思想。
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.johann.binarytea")
 /*
  * @RestController 注解相当于@Controller+@ResponseBody两个注解的结合，
  * @Controller 表示该类是一个控制器，它用于标识一个Spring类的实例是Spring MVC Controller对象。

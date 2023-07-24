@@ -1,7 +1,7 @@
 package com.johann.config;
 
 /**
- * <p>
+ * 通过实现Banner接口，自定义Banner
  *
  * @author Johann
  * @version 1.0
