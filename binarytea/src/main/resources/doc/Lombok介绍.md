@@ -1,6 +1,7 @@
 Lombok是一个用于简化Java代码的开源库。它通过注解的方式,可以在编译时自动生成getter/setter、equals、hashcode、tostring、logger等方法,从而减少冗余的代码。
 
 主要功能和用途如下:
+
 | 注解 | 说明 |
 |-|-|
 | @Getter、@Setter | 自动生成成员属性的 Getter 和 Setter 方法 |
@@ -13,3 +14,4 @@ Lombok是一个用于简化Java代码的开源库。它通过注解的方式,可
 | @SneakyThrows | 自动抛出受检查异常,无需显式抛出 |
 | @NonNull | 标记参数或返回值不能为null |
 | @Cleanup | 在资源使用完后自动关闭资源 |
+
