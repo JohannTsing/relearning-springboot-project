@@ -14,6 +14,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,8 @@ import java.util.Random;
  */
 @Log4j2
 @EnableScheduling
+//基于XML的声明式事务
+@ImportResource("xml-transaction-config.xml")
 public class BinaryteaApplication {
 
     /**

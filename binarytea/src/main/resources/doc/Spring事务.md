@@ -105,7 +105,7 @@ public enum Propagation {
      * 支持当前事务，如果不存在则以非事务方式执行。类似于 EJB 的同名事务属性。
      * 注意：对于具有事务同步功能的事务管理器来说，SUPPORTS 与没有事务略有不同，因为它定义了同步功能将适用的事务范围。
      * 因此，相同的资源（JDBC 连接、Hibernate 会话等）将在整个指定范围内共享。请注意，这取决于事务管理器的实际同步配置。
-     * 
+     *
      * 一般来说，请谨慎使用 PROPAGATION_SUPPORTS！ 特别是，不要依赖 PROPAGATION_SUPPORTS 范围内的 PROPAGATION_REQUIRED 或 
      * PROPAGATION_REQUIRES_NEW （这可能会导致运行时同步冲突）。 
      * 如果这种嵌套是不可避免的，请确保正确配置事务管理器（通常切换到“实际事务同步”）。
@@ -113,7 +113,7 @@ public enum Propagation {
     SUPPORTS(TransactionDefinition.PROPAGATION_SUPPORTS), //SUPPORTS(1),
     /**
      * 支持当前事务；如果不存在当前事务，则抛出异常。类似于 EJB 的同名事务属性。
-     * 
+     *
      * 请注意，PROPAGATION_MANDATORY 作用域中的事务同步总是由周围的事务驱动。
      */
     MANDATORY(TransactionDefinition.PROPAGATION_MANDATORY), //MANDATORY(2),
@@ -121,7 +121,7 @@ public enum Propagation {
      * 创建一个新事务，暂停当前事务（如果存在）。类似于 EJB 的同名事务属性。
      * 注意：实际事务暂停不会在所有事务管理器上立即生效。这尤其适用于 org.springframework.transaction.jta.JtaTransactionManager，
      * 它要求 javax.transaction.TransactionManager 对其可用（这在标准 Java EE 中是服务器特定的）。
-     * 
+     *
      * PROPAGATION_REQUIRES_NEW 作用域总是定义它自己的事务同步。现有的同步将被适当地暂停和恢复。
      */
     REQUIRES_NEW(TransactionDefinition.PROPAGATION_REQUIRES_NEW), //REQUIRES_NEW(3),
@@ -129,7 +129,7 @@ public enum Propagation {
      * 不支持当前事务；而是始终以非事务方式执行。类似于 EJB 的同名事务属性。
      * 注意：实际事务暂停不会在所有事务管理器上立即生效。这尤其适用于 org.springframework.transaction.jta.JtaTransactionManager，
      * 它要求 javax.transaction.TransactionManager 对其可用（这在标准 Java EE 中是服务器特定的）。
-     * 
+     *
      * 请注意，事务同步在 PROPAGATION_NOT_SUPPORTED 作用域中不可用。现有的同步将被适当地暂停和恢复。
      */
     NOT_SUPPORTED(TransactionDefinition.PROPAGATION_NOT_SUPPORTED), //NOT_SUPPORTED(4),
@@ -198,3 +198,377 @@ public interface TransactionDefinition {
 > * READ COMMITTED（读已提交）：Oracle 默认使用的事务隔离级别。事务内执行的查询只能看到查询执行前（而非事务开始前）就已经提交的数据。Oracle 的查询永远不会读取脏数据（未提交的数据）。Oracle 不会阻止一个事务修改另一事务中的查询正在访问的数据，因此在一个事务内的两个查询的执行间歇期间，数据有可能被其他事务修改。
 > * READ ONLY（只读）：只读事务只能看到事务执行前就已经提交的数据，且事务中不能执行INSERT，UPDATE及DELETE语句。
 > * SERIALIZABLE（串行化）：串行化隔离的事务只能看到事务执行前就已经提交的数据，以及事务内 INSERT ，UPDATE及DELETE语句对数据的修改。串行化隔离的事务不会出现不可重复读取或不存在读取的现象。
+
+### Spring事务的基本配置
+Spring Framework 的核心类是 `TransactionManager`，并且在上下文中需要一个 `PlatformTransactionManager` Bean，例如，`DataSourceTransactionManager` 或者`JpaTransactionManager`。
+
+可以像下面这样来定义一个 `PlatformTransactionManager` :
+```java
+@Configuration
+public class TransactionConfiguration {
+    @Bean
+    public DataSourceTransactionManager transactionManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
+}
+```
+
+在Spring Boot中，提供了一整套事务的自动配置，主要的自动配置类是 `DataSourceTransactionManagerAutoConfiguration`和`TransactionAutoConfiguration`。
+
+`DataSourceTransactionManagerAutoConfiguration` 的作用主要是自动配置 `DataSourceTransactionManager`，它的源码如下：
+```java
+/**
+ * {@link EnableAutoConfiguration Auto-configuration} for {@link JdbcTransactionManager}.
+ *
+ */
+// 该自动配置类需要在 TransactionAutoConfiguration 之前执行
+@AutoConfiguration(before = TransactionAutoConfiguration.class)
+// 检查 JdbcTemplate 和 TransactionManager 类是否在类路径上
+@ConditionalOnClass({ JdbcTemplate.class, TransactionManager.class })
+// 定义该类的配置顺序，值越小优先级越高，LOWEST_PRECEDENCE = Integer.MAX_VALUE;
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
+@EnableConfigurationProperties(DataSourceProperties.class)
+public class DataSourceTransactionManagerAutoConfiguration {
+
+    @Configuration(proxyBeanMethods = false)
+    // 1, 当Spring 上下文中提供了明确的一个 DataSource (只有一个或者标明了一个主要的 Bean)
+    @ConditionalOnSingleCandidate(DataSource.class)
+    static class JdbcTransactionManagerConfiguration {
+
+        @Bean
+        // 2, 当Spring 上下文中没有提供明确的一个 PlatformTransactionManager Bean
+        // 3, Spring Boot会自动创建一个DataSourceTransactionManager Bean
+        @ConditionalOnMissingBean(TransactionManager.class)
+        DataSourceTransactionManager transactionManager(Environment environment, DataSource dataSource,
+                                                        ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+            DataSourceTransactionManager transactionManager = createTransactionManager(environment, dataSource);
+            /**
+             *  TransactionManagerCustomizers是 Spring Boot 的自动配置留下的扩展点可以让我们通过创建TransactionManagerCustomizers 来对自动配置的 DataSourceTransactionManager进行微调。
+             *  在Spring Boot 中类似的 XXXCustomizer 还有很多，比如在 Web 相关章节里会看到的RestTemplateCustomizer.
+             */
+            transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
+            return transactionManager;
+        }
+
+        private DataSourceTransactionManager createTransactionManager(Environment environment, DataSource dataSource) {
+            return environment.getProperty("spring.dao.exceptiontranslation.enabled", Boolean.class, Boolean.TRUE)
+                    ? new JdbcTransactionManager(dataSource) : new DataSourceTransactionManager(dataSource);
+        }
+
+    }
+
+}
+```
+
+`DataSourceTransactionManagerAutoConfiguration`执行完毕后，`TransactionAutoConfiguration` 会为事务再提供进一步的配置。
+
+它主要做了两件事:
+1. 第一是创建了编程式事务需要用到的 `TransactionTemplate`;
+2. 第二是开启了基于注解的事务支持，这部分是由内部类`EnableTransactionManagementConfiguration` 来定义
+
+它的源代码如下：
+```java
+/**
+ * {@link EnableAutoConfiguration Auto-configuration} for Spring transaction.
+ *
+ * @author Stephane Nicoll
+ * @since 1.3.0
+ */
+@AutoConfiguration
+@ConditionalOnClass(PlatformTransactionManager.class)
+// TransactionProperties 是事务的属性配置，其中只有两个配置: 
+// 1, spring.transaction.default.timeout 用于配置默认超时时间，默认单位为秒; 
+// 2, spring.transaction.rollback-on-commit-failure 配置在提交失败时是否回滚。
+@EnableConfigurationProperties(TransactionProperties.class)
+public class TransactionAutoConfiguration {
+
+    // 省略部分代码
+
+    /**
+     * 创建了编程式事务需要用到的 TransactionTemplate
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnSingleCandidate(PlatformTransactionManager.class)
+    public static class TransactionTemplateConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(TransactionOperations.class)
+        public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+            return new TransactionTemplate(transactionManager);
+        }
+
+    }
+
+    /**
+     * 开启了基于注解的事务支持，这部分是由内部类`EnableTransactionManagementConfiguration` 来定义
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnBean(TransactionManager.class)
+    @ConditionalOnMissingBean(AbstractTransactionManagementConfiguration.class)
+    public static class EnableTransactionManagementConfiguration {
+
+        @Configuration(proxyBeanMethods = false)
+        @EnableTransactionManagement(proxyTargetClass = false)
+        @ConditionalOnProperty(prefix = "spring.aop", name = "proxy-target-class", havingValue = "false")
+        public static class JdkDynamicAutoProxyConfiguration {
+
+        }
+
+        @Configuration(proxyBeanMethods = false)
+        @EnableTransactionManagement(proxyTargetClass = true)
+        // 如果没有配置`spring.aop.proxy-target-class=true`,此时默认开启
+        @ConditionalOnProperty(prefix = "spring.aop", name = "proxy-target-class", havingValue = "true",
+                matchIfMissing = true)
+        public static class CglibAutoProxyConfiguration {
+
+        }
+
+    }
+
+}
+```
+在配置类上添加 `@EnableTransactionManagement` 注解就能开启事务支持。
+
+Spring Framework 的声明式事务是通过 AOP 来实现的，因此根据 AOP 配置的不同，需要选择是否开启对类的代理。当`spring.aop.proxy-target-class=true` 时，可以直接对没有实现接口的类开启声明式事务支持，这也是默认的配置。
+
+翻看 `AopAutoConfiguration` 的源码，也能看到其中有类似的自动配置。可见，在 Spring Boot 中基于 CGLIB 的 AOP 就是默认的 AOP 代理方式。
+```java
+/**
+ * 自动配置 Spring 的 AOP 支持。相当于在配置中启用 @EnableAspectJAutoProxy。
+ * 如果 spring.aop.auto=false，配置将不会被激活。proxyTargetClass 属性默认为 true，但可以通过指定 spring.aop.proxy-target-class=false 进行重载。
+ */
+@AutoConfiguration
+@ConditionalOnProperty(prefix = "spring.aop", name = "auto", havingValue = "true", matchIfMissing = true)
+public class AopAutoConfiguration {
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Advice.class)
+    static class AspectJAutoProxyingConfiguration {
+
+        @Configuration(proxyBeanMethods = false)
+        @EnableAspectJAutoProxy(proxyTargetClass = false)
+        @ConditionalOnProperty(prefix = "spring.aop", name = "proxy-target-class", havingValue = "false")
+        static class JdkDynamicAutoProxyConfiguration {
+
+        }
+
+        @Configuration(proxyBeanMethods = false)
+        @EnableAspectJAutoProxy(proxyTargetClass = true)
+        @ConditionalOnProperty(prefix = "spring.aop", name = "proxy-target-class", havingValue = "true",
+                matchIfMissing = true)
+        static class CglibAutoProxyConfiguration {
+
+        }
+
+    }
+
+    // 省略部分代码
+
+}
+```
+
+### 声明式事务
+
+#### 基于注解的声明式事务
+Spring Framework提供了一个`@Transactional`注解，它可以在类型和方法上（建议在具体的类而非接口上添加`@Transactional`注解。在方法添加该注解时也请只用在修饰符为 public 的方法上）标注与事务相关的信息。
+
+同时，我们也可以使用`JTA` 中的 `@Transactional`注解(在 `javax.transaction` 包里)，两者的作用基本是一样的。
+
+- `@Transactional` 注解可以设置的事务属性：
+  | 属性 | 默认值 | 描述 |
+  |-|-|-|
+  | transactionManager | 默认会找名为 transactionManager 的事务管理器 | 指定事务管理器 |
+  | propagation | Propagation.REQUIRED | 指定事务的传播性 |
+  | isolation | Isolation.DEFAULT | 指定事务的隔离性 |
+  | timeout | -1，即由具体的底层实现来设置 | 指定事务超时时间 |
+  | readOnly | false | 是否为只读事务 |
+  | rollbackFor / rollbackForClassName | - | 指定需要回滚事务的异常类型 |
+  | noRollbackFor /noRollbackForClassName | - | 指定无须回滚事务的异常类型 |
+> 注意：
+> 默认情况下，事务只会在遇到 RuntimeException 和 Error 时才会回滚，碰到受检异常(checked exception)时并不会回滚。
+> 例如，我们定义了一个业务异常 BizException，它继承的是Exception 类，在代码抛出这个异常时，事务不会自己回滚，但我们可以手动设置回滚，或者在rollbackFor 中进行设置。
+
+- 开启注解驱动的事务支持的两种方式：
+    1. 在配置类上添加 `@EnableTransactionManagement` 注解。
+    2. 通过`<tx:annotation-driven/>`这个XML标签来启用注解支持。
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- 开启事务注解支持,可以明确设置一个TransactionManager -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+</beans>
+```
+
+- 注解驱动事务支持的部分配置：
+  | 支持的方式 | 配置项 | 默认值 | 含义 | 补充 |
+  |-|-|-|-|
+  | `<tx:annotation-driven/>`, @EnableTransactionManagement | mode | proxy | 声明式事务AOP的拦截方式，默认proxy是代理方式也可以改为 aspectj | - |
+  | `<tx:annotation-driven/>`, @EnableTransactionManagement | proxy-target-class（XML） / proxyTargetClass | false | 是否使用 CGLIB 的方式拦截类 | 虽然此处的默认值是 false，但是通过`TransactionAutoConfiguration`中的配置得知，在Spring Boot 中，默认会使用 CGLIB 的方式来做拦截。 |
+  | `<tx:annotation-driven/>`, @EnableTransactionManagement | order | Ordered.LOWEST_PRECEDENCE | 声明式事务 AOP拦截的顺序，值越小，优先级越高 | - |
+  | `<tx:annotation-driven/>` | transaction-manager | transactionManager | 指定事务管理器 | - |
+
+在`<tx:annotation-driven/>` 中还有一个 `transacation-manager` 属性，当事务管理器的名字不是`transactionManager` 时用来指定事务要使用的事务管理器。但 `@EnableTransactionManagement` 里却没有这一属性，它会根据类型来做注入。
+如果希望明确指定使用哪个 `TransactionManager`，可以让 `@Configuration` 类实现 `TransactionManagementConfigurer` 接口，在 `annotationDrivenTransactionManager()`方法里返回希望使用的那个 `TransactionManager`。
+
+> 事务加在哪层比较合适?
+> 一次业务操作一般都会涉及多张表的数据，因此在单表的 DAO 或 Repository 上增加事务，粒度太细，并不能实现业务的要求。而在对外提供的服务接口上增加事务，整个事务的范围又太大，一个请求从开始到结束都在一个大事务里，着实又有些浪费。
+所以，事务一般放在内部的领域服务上，也就是 Service 层上会是比较常见的一个做法，其中的一个方法，也就对应了一个业务操作。
+
+#### 基于XML的声明式事务
+Spring Framework 提供了一系列`<tx/>`的XML 来配置事务相关的AOP 通知。有了AOP通知后我们就可以像普通的 AOP 配置那样对方法的执行进行拦截和增强了。
+
+其中，`<tx:advice/>`用来配置事务通知，如果事务管理器的名字是 `transactionManager`，那就可以不用设置 `transaction-manager` 属性了。具体的事务属性则通过 `<tx:attributes/>`和`<tx:method/>`来设置。
+`<tx:method/>`可供设置的属性和 `@Transactional`注解的基本一样：
+| 属性 | 默认值 | 描述 |
+|-|-|-|
+| name | 无 | 要拦截的方法名称，可以带通配符，是唯一的必选项 |
+| propagation | REQUIRED | 指定事务的传播性 |
+| isolation | DEFAULT | 指定事务的隔离性 |
+| timeout | -1 | 指定事务超时时间，单位为秒 |
+| read-only | false | 是否为只读事务 |
+| rollback-for | - | 会触发回滚的异常清单，以逗号分隔，可以是全限定类名，也可以是简单类名 |
+| no-rollback-for | - | 不触发回滚的异常清单，以逗号分隔，可以是全限定类名，也可以是简单类名 |
+
+配置步骤如下：
+1. 添加基于XML的声明式事务的配置文件`xml-transaction-config.xml`:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--配置事务通知-->
+    <tx:advice id="demoRepositoryTx">
+        <tx:attributes>
+            <tx:method name="showNames" read-only="true"/>
+            <tx:method name="insertRecordRequired" />
+            <tx:method name="insertRecordRequiresNew" propagation="REQUIRES_NEW"/>
+            <tx:method name="insertRecordNested" propagation="NESTED"/>
+        </tx:attributes>
+    </tx:advice>
+    <tx:advice id="mixServiceTx">
+        <tx:attributes>
+            <tx:method name="*" />
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置AOP-->
+    <aop:config>
+        <aop:pointcut id="demoRepositoryPointcut" expression="execution(* com.johann.binarytea.transaction.DemoRepository.*(..))"/>
+        <aop:pointcut id="mixServicePointcut" expression="execution(* com.johann.binarytea.transaction.MixService.*(..))"/>
+        <aop:advisor advice-ref="demoRepositoryTx" pointcut-ref="demoRepositoryPointcut"/>
+        <aop:advisor advice-ref="mixServiceTx" pointcut-ref="mixServicePointcut"/>
+    </aop:config>
+
+</beans>
+```
+2. 在主类上或者 `@Configuration` 配置类上引入该xml配置文件：
+```text
+//基于XML的声明式事务
+@ImportResource("xml-transaction-config.xml")
+```
+> 声明式事务背后的原理
+>
+> Spring Framework 的声明式事务，其本质是对目标类和方法进行了AOP 拦截，并在方法的执行前后增加了事务相关的操作，比如启动事务、提交事务和回滚事务。
+>
+> 既然是通过AOP 实现的，那它就必定遵循了 AOP 的各种规则和限制。Spring Framework的AOP 增强通常都是通过代理的方式来实现的，这就意味着事务也是在代理类上的。我们必须调用增强后的代理类中的方法，而非原本的对象，这样才能拥有事务。也就是说调用下面的methodwithoutTx() 并不会启动一个事务。
+>
+> public class Demo {
+>      @Trasactional
+>      public void methodwithTx() {...}
+>
+>      public void methodwithoutTx() {
+>        this.methodwithTx();
+>     }
+> }
+>
+> 如果一定要调用自己的方法，可以从 `ApplicationContext` 中获取自己的代理对象，操作这个对象上的方法，而不是使用 this。
+> 或者，也可以在适当配置下，通过`AopContext.currentProxy()`来获得当前的代理。
+
+### 编程式事务
+Spring Framework 也提供了编程式事务的支持，它的核心是`TransactionTemplate`，它是一个模板类，用来简化编程式事务的使用。
+
+Spring Boot 在 `TransactionAutoConfiguration` 中包含了一个内部类 `TransactionTemplateConfiguration`，会自动基于明确的 `PlatformTransactionManager` 创建 `TransactionTemplate`。
+
+手动创建`TransactionTemplate`：
+```java
+@Confiquration
+public class TxConfiguration {
+    @Bean
+    public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+        return new TransactionTemplate(transactionManager);
+    }
+}
+```
+在使用时，我们主要用它的 `execute()` 和 `executeWithoutResult()`方法，方法的声明形式如下所示:
+```text
+public <T> T execute(TransactionCallback<T> action) throws TransactionException;
+public void executeWithoutResult(Consumer<TransactionStatus> action) throws TransactionException:
+```
+`TransactionCallback` 接口就一个 `doInTransaction()` 方法，通常都是直接写个匿名类，或者是Lambda 表达式。
+```text
+@Autowired
+private TransactionTemplate transactionTemplate;
+/**
+ * 使用编程式事务
+ * 匿名类形式
+ * @return
+ */
+public String showNamesProgrammatically1() {
+    return transactionTemplate.execute(new TransactionCallback<String>() {
+        @Override
+        public String doInTransaction(TransactionStatus status) {
+            return jdbcTemplate.queryForList("select name from t demo;", String.class)
+                    .stream().collect(Collectors.joining(","));
+        }
+    });
+}
+/**
+ * 使用编程式事务
+ * Lambda形式
+ * @return
+ */
+public String showNamesProgrammatically2() {
+    return transactionTemplate.execute(
+            status -> jdbcTemplate.queryForList("select name from t demo;", String.class)
+                    .stream().collect(Collectors.joining(",")));
+}
+
+/**
+ * 使用编程式事务
+ * 匿名类形式
+ * @return
+ */
+public void insertRecordRequiredProgrammatically1() {
+    transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+        @Override
+        protected void doInTransactionWithoutResult(TransactionStatus status) {
+            jdbcTemplate.update(SQL, "one");
+        }
+    });
+}
+/**
+ * 使用编程式事务
+ * Lambda形式
+ * @return
+ */
+public void insertRecordRequiredProgrammatically2() {
+    transactionTemplate.executeWithoutResult(
+            status -> jdbcTemplate.update(SQL, "one"));
+}
+```

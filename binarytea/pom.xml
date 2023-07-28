@@ -90,6 +90,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!--基于XML的声明式事务，需要AOP依赖支持-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
