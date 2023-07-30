@@ -42,8 +42,13 @@ public class DemoRepository {
                 .stream().collect(Collectors.joining(","));
     }
 
-    //@Autowired
     private TransactionTemplate transactionTemplate;
+
+    //@Autowired
+    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+        this.transactionTemplate = transactionTemplate;
+    }
+
     /**
      * 使用编程式事务
      * 匿名类形式

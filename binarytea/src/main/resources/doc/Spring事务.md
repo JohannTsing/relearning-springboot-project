@@ -478,7 +478,7 @@ Spring Framework 提供了一系列`<tx/>`的XML 来配置事务相关的AOP 通
 </beans>
 ```
 2. 在主类上或者 `@Configuration` 配置类上引入该xml配置文件：
-```text
+```java
 //基于XML的声明式事务
 @ImportResource("xml-transaction-config.xml")
 ```
@@ -521,7 +521,7 @@ public <T> T execute(TransactionCallback<T> action) throws TransactionException;
 public void executeWithoutResult(Consumer<TransactionStatus> action) throws TransactionException:
 ```
 `TransactionCallback` 接口就一个 `doInTransaction()` 方法，通常都是直接写个匿名类，或者是Lambda 表达式。
-```text
+```java
 @Autowired
 private TransactionTemplate transactionTemplate;
 /**
@@ -570,5 +570,111 @@ public void insertRecordRequiredProgrammatically1() {
 public void insertRecordRequiredProgrammatically2() {
     transactionTemplate.executeWithoutResult(
             status -> jdbcTemplate.update(SQL, "one"));
+}
+```
+如果希望修改事务的属性，可以直接调用 `TransactionTemplate` 的对应方法，或者在创建时将其作为Bean 属性配置进去，这里建议使用对应的常量，而非写成固定的一个数字。
+这些属性是设置在对象上的，如果要在不同的代码中复用同一个 `TransactionTemplate` 对象，请确认它们可以使用相同的配置。
+
+在代码中设置传播性与隔离性，可以使用 `setPropagationBehavior()`和 `setIsolationLevel()`方法，如果是在XML配置中设置Bean属性，则可以选择对应的`propagationBehaviorName`和`isolationLevelName` 属性。
+
+### 异常处理
+Spring Framework 为我们提供了一套统一的数据库操作异常体系，它独立于具体的数据库产品甚至也不依赖JDBC，支持绝大多数常用数据库。
+
+它能将不同数据库的返回码翻译成特定的类型，开发者只需捕获并处理 Spring Framework 封装后的异常就可以了。
+
+#### 统一的异常抽象
+Spring Framework 的数据库操作异常抽象从 `DataAccessException` 这个类开始，所有的异常都是它的子类。
+
+Spring Framework 又是怎么来理解和翻译这么多不同类型的数据库异常的呢？ 其背后的核心接口就是 `SQLExceptionTranslator`，它负责将不同的 `SQLException` 转换为 `DataAccessException`。
+
+`SQLExceptionTranslator`有三个实现类，分别是`SQLStateSQLExceptionTranslator`、`SQLExceptionSubclassTranslator`和`SQLErrorCodeSQLExceptionTranslator`。
+- `SQLStateSQLExceptionTranslator` 会分析异常中的 SQLState，根据标准 SQLState 和常见的特定数据库 SQLState 进行转换;
+- `SQLExceptionSubclassTranslator` 根据 `java.sql.SQLException` 的子类类型进行转换;
+- `SQLErrorCodeSQLExceptionTranslator` 则是根据异常中的错误码进行转换。
+
+`JdbcTemplate` 中会创建一个默认的 `SQLErrorCodeSQLExceptionTranslator`，择不同配置来进行实际的异常转换。
+
+`SQLErrorCodeSQLExceptionTranslator` 会通过 `SQLErrorCodesFactory` 来获取特定数据库的错误码信息，`SQLErrorCodesFactory` 默认从CLASSPATH的`org/springframework/jdbc/support/sql-error-codes.xml`文件中加载错误码配置，这是个Bean的配置文件，其中都是`SQLErrorCodes`类型的 Bean。
+
+以下是MySQL的配置：
+```xml
+<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductNames">
+        <list>
+            <value>MySQL</value>
+            <value>MariaDB</value>
+        </list>
+    </property>
+    <property name="badSqlGrammarCodes">
+        <value>1054,1064,1146</value>
+    </property>
+    <property name="duplicateKeyCodes">
+        <value>1062</value>
+    </property>
+    <property name="dataIntegrityViolationCodes">
+        <value>630,839,840,893,1169,1215,1216,1217,1364,1451,1452,1557</value>
+    </property>
+    <property name="dataAccessResourceFailureCodes">
+        <value>1</value>
+    </property>
+    <property name="cannotAcquireLockCodes">
+        <value>1205,3572</value>
+    </property>
+    <property name="deadlockLoserCodes">
+        <value>1213</value>
+    </property>
+</bean>
+```
+`SQLErrorCodeSQLExceptionTranslator` 会先尝试`SQLErrorCodes` 中的 `CustomSqlExceptionTranslator` 来转换，接着再尝试 `SQLErrorCodes` 中的 `customTranslations`，最后再根据配置的错误码来判断。如果最后还是匹配不上，就降级到其他 `SQLExceptionTranslator` 上。
+
+#### 自定义错误码处理逻辑
+在看过了 Spring Framework 处理数据库错误码的逻辑之后，我们很快就能想到去扩展 `SQLErrorCodes`。`SQLErrorCodesFactory` 其实也预留了扩展点，它会加载 CLASSPATH根目录中的 `sql-error-codes.xm`文件，用其中的配置覆盖默认配置。`CustomsQLErrorCodesTranslation` 提供了根据错误码来映射异常的功能。
+
+扩展MySQl的异常配置：
+```xml
+<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductNames">
+        <list>
+            <value>MySQL</value>
+            <value>MariaDB</value>
+        </list>
+    </property>
+    <property name="badSqlGrammarCodes">
+        <value>1054,1064,1146</value>
+    </property>
+    <property name="duplicateKeyCodes">
+        <value>1062</value>
+    </property>
+    <property name="dataIntegrityViolationCodes">
+        <value>630,839,840,893,1169,1215,1216,1217,1364,1451,1452,1557</value>
+    </property>
+    <property name="dataAccessResourceFailureCodes">
+        <value>1</value>
+    </property>
+    <property name="cannotAcquireLockCodes">
+        <value>1205,3572</value>
+    </property>
+    <property name="deadlockLoserCodes">
+        <value>1213</value>
+    </property>
+    <property name="customTranslations">
+        <bean class="org.springframework.jdbc.support.CustomSQLErrorCodesTranslation">
+            <property name="errorCodes" value="123456" />
+            <property name="exceptionClass" value="learning.spring.data.DbSwitchingException" />
+        </bean>
+    </property>
+</bean>
+```
+
+还有另一种做法，即直接继承`SQLErrorCodeSQLExceptionTranslator`，覆盖其中的 `customTranslate(String task, @Nullable String sql, SQLException sqlEx)`方法，随后在JdbcTemplate中直接注人我们自己写的类实例。
+```java
+@Autowired
+private JdbcTemplate jdbcTemplate;
+
+@Autowired
+private MySQLErrorCodeSQLExceptionTranslator mySQLErrorCodeSQLExceptionTranslator;
+
+public void myMethod() {
+    jdbcTemplate.setExceptionTranslator(mySQLErrorCodeSQLExceptionTranslator);
 }
 ```
