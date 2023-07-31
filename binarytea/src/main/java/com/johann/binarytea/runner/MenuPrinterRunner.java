@@ -1,9 +1,7 @@
 package com.johann.binarytea.runner;
 
-import com.johann.binarytea.repository.MenuRepository;
-import lombok.Setter;
+import com.johann.binarytea.jdbcTemplate.repository.MenuRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;

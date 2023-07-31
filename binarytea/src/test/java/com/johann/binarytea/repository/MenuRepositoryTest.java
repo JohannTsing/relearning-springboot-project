@@ -1,7 +1,7 @@
 package com.johann.binarytea.repository;
 
-import com.johann.binarytea.BinaryteaApplication;
-import com.johann.binarytea.model.MenuItem;
+import com.johann.binarytea.jdbcTemplate.model.MenuItem;
+import com.johann.binarytea.jdbcTemplate.repository.MenuRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

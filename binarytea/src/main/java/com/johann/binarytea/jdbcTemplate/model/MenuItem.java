@@ -1,4 +1,4 @@
-package com.johann.binarytea.model;
+package com.johann.binarytea.jdbcTemplate.model;
 
 import lombok.Builder;
 import lombok.Getter;

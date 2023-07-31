@@ -1,12 +1,11 @@
-package com.johann.binarytea.repository;
+package com.johann.binarytea.jdbcTemplate.repository;
 
-import com.johann.binarytea.model.MenuItem;
+import com.johann.binarytea.jdbcTemplate.model.MenuItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * <p>
+ * 使用 JdbcTemplate 操作数据库
  *
  * @author Johann
  * @version 1.0

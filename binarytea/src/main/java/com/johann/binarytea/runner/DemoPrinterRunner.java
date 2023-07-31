@@ -10,13 +10,13 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>
+ * 使用 ApplicationRunner 接口，实现在 Spring Boot 启动后执行的代码
  *
  * @author Johann
  * @version 1.0
  * @see
  **/
-@Component
+//@Component
 @Slf4j
 @Order(2)
 public class DemoPrinterRunner implements ApplicationRunner {

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * <p>
+ * 自定义MeterRegistry,将度量信息输出到日志中
  *
  * @author Johann
  * @version 1.0
