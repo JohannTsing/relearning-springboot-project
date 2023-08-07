@@ -8,7 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.joda.money.Money;
-
+import org.hibernate.annotations.Parameter;
 import javax.persistence.*;
 import java.util.Date;
 
@@ -32,7 +32,7 @@ public class MenuItem {
     @GeneratedValue //(strategy = GenerationType.IDENTITY)
     // 除了自增主键，还可以用 @SequenceGenerator 和 @TaleGenerator 来指定基于序列和表生成主键
     //@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence-generator")
-    //@SequenceGenerator(name = "sequence-generator", sequenceName = "seq menu")
+    //@SequenceGenerator(name = "sequence-generator", sequenceName = "seq_menu")
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -45,7 +45,7 @@ public class MenuItem {
     // 通过 @Type 声明了如何将数据中 Long 类型的值转换为 Money。
     // 这里用到了一个开源的转换类，如果数据库里存的是小数类型，可以考虑把 PersistentMoneyMinorAmount 替换为 PersistentMoneyAmount。
     @Type(type = "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyAmount",
-            parameters = {@org.hibernate.annotations.Parameter(name = "currencyCode", value = "CNY")})
+            parameters = {@Parameter(name = "currencyCode", value = "CNY")})
     private Money price;
 
     @Column(name = "create_time", updatable = false)

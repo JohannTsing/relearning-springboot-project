@@ -27,21 +27,21 @@ public class Order {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "maker_id")
+    @JoinColumn(name = "maker_id",referencedColumnName = "id") // referencedColumnName: 关联表中被引用的列名，默认为被关联表的主键列
     private TeaMaker maker;
 
     @ManyToMany
-    @JoinTable(name = "t_order_item",
-            joinColumns = @JoinColumn(name = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "order_id"))
-    @OrderBy
+    @JoinTable(name = "t_order_item", // 中间表的名称
+            joinColumns = @JoinColumn(name = "item_id"), // 连接当前表的外键列
+            inverseJoinColumns = @JoinColumn(name = "order_id")) // 连接关联表的外键列
+    @OrderBy //("id desc") 默认按照主键升序(ASC)排序
     private List<MenuItem> items;
 
     // @Embedded 注解表示这是一个嵌入类，也就是说 Order 里面有一个嵌入类 Amount，而不是一个单独的表。
     @Embedded
     private Amount amount;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @Column(name = "create_time", updatable = false)

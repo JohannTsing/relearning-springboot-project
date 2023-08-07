@@ -1,10 +1,10 @@
 ### @EnableTransactionManagement
 
-Enables Spring's annotation-driven transaction management capability, similar to the support found in Spring's `<tx:*>` XML namespace. To be used on @Configuration classes to configure traditional, imperative transaction management or reactive transaction management.
+Enables `Spring's` annotation-driven transaction management capability, similar to the support found in `Spring's` `<tx:*> XML namespace`. To be used on @Configuration classes to configure traditional, imperative transaction management or reactive transaction management.
 > 启用 Spring 的注解驱动事务管理功能，类似于 Spring 的 `<tx:*>` XML 命名空间中的支持。可用于 @Configuration 类，以配置传统、命令式事务管理或反应式事务管理。
 
-The following example demonstrates imperative transaction management using a PlatformTransactionManager. For reactive transaction management, configure a ReactiveTransactionManager instead.
-> 下面的示例使用 PlatformTransactionManager 演示了命令式事务管理。要进行反应式事务管理，请配置 ReactiveTransactionManager。
+The following example demonstrates imperative transaction management using a `PlatformTransactionManager`. For reactive transaction management, configure a `ReactiveTransactionManager` instead.
+> 下面的示例使用 `PlatformTransactionManager` 演示了命令式事务管理。要进行反应式事务管理，请配置 `ReactiveTransactionManager`。
 
 ```java
 @Configuration
@@ -49,16 +49,16 @@ For reference, the example above can be compared to the following Spring XML con
 </beans>
 ```
 
-In both of the scenarios above, @EnableTransactionManagement and `<tx:annotation-driven/>` are responsible for registering the necessary Spring components that power annotation-driven transaction management, such as the TransactionInterceptor and the proxy- or AspectJ-based advice that weaves the interceptor into the call stack when JdbcFooRepository's @Transactional methods are invoked.
-> 在上述两种情况下，@EnableTransactionManagement 和 `<tx:annotation-driven/>`负责注册必要的 Spring 组件，以支持注释驱动的事务管理，
-> 例如 TransactionInterceptor 和基于proxy 或 AspectJ 的建议，当调用 JdbcFooRepository 的 @Transactional 方法时，将拦截器编织到调用堆栈中。
+In both of the scenarios above, `@EnableTransactionManagement` and `<tx:annotation-driven/>` are responsible for registering the necessary Spring components that power annotation-driven transaction management, such as the `TransactionInterceptor` and the `proxy- or AspectJ-based` advice that weaves the interceptor into the call stack when `JdbcFooRepository's @Transactional` methods are invoked.
+> 在上述两种情况下，``@EnableTransactionManagement` 和 `<tx:annotation-driven/>`负责注册必要的 Spring 组件，以支持注释驱动的事务管理，
+> 例如 `TransactionInterceptor` 和基于proxy 或 `AspectJ` 的建议，当调用 `JdbcFooRepository` 的 `@Transactional` 方法时，将拦截器编织到调用堆栈中。
 
-A minor difference between the two examples lies in the naming of the TransactionManager bean: In the @Bean case, the name is "txManager" (per the name of the method); in the XML case, the name is "transactionManager". `<tx:annotation-driven/>` is hard-wired to look for a bean named "transactionManager" by default, however @EnableTransactionManagement is more flexible; it will fall back to a by-type lookup for any TransactionManager bean in the container. Thus the name can be "txManager", "transactionManager", or "tm": it simply does not matter.
-> 这两个示例的细微差别在于 TransactionManager Bean 的命名：在 @Bean 的情况下，名称是 "txManager"（根据方法的名称）；而在 XML 的情况下，名称是 "transactionManager"。
-> 默认情况下，`<tx:annotation-driven/>` 被硬连线为查找名为 "transactionManager "的 Bean，但 @EnableTransactionManagement 更为灵活；它会回退到按类型查找容器中的任何 TransactionManager Bean。因此，名称可以是 "txManager"、"transactionManager "或 "tm"：这并不重要。
+A minor difference between the two examples lies in the naming of the `TransactionManager` bean: In the @Bean case, the name is `"txManager"` (per the name of the method); in the XML case, the name is `"transactionManager"`. `<tx:annotation-driven/>` is hard-wired to look for a bean named `"transactionManager"` by default, however `@EnableTransactionManagement` is more flexible; it will fall back to a by-type lookup for any `TransactionManager` bean in the container. Thus the name can be `"txManager"`, `"transactionManager"`, or `"tm"`: it simply does not matter.
+> 这两个示例的细微差别在于 `TransactionManager` Bean 的命名：在 @Bean 的情况下，名称是 `"txManager"`（根据方法的名称）；而在 XML 的情况下，名称是 `"transactionManager"`。
+> 默认情况下，`<tx:annotation-driven/>` 被硬连线为查找名为 `"transactionManager "`的 Bean，但 `@EnableTransactionManagement` 更为灵活；它会回退到按类型查找容器中的任何 `TransactionManager` Bean。因此，名称可以是 `"txManager"`、`"transactionManager "`或 `"tm"`：这并不重要。
 
-For those that wish to establish a more direct relationship between @EnableTransactionManagement and the exact transaction manager bean to be used, the TransactionManagementConfigurer callback interface may be implemented - notice the implements clause and the @Override-annotated method below:
-> 如果希望在 @EnableTransactionManagement 和要使用的事务管理器 bean 之间建立更直接的关系，可以实现 TransactionManagementConfigurer 回调接口--
+For those that wish to establish a more direct relationship between `@EnableTransactionManagement` and the exact transaction manager bean to be used, the `TransactionManagementConfigurer` callback interface may be implemented - notice the implements clause and the @Override-annotated method below:
+> 如果希望在 `@EnableTransactionManagement` 和要使用的事务管理器 bean 之间建立更直接的关系，可以实现 `TransactionManagementConfigurer` 回调接口--
 > 注意下面的实现子句和 @Override 注解方法：
 
 ```java
@@ -90,16 +90,17 @@ public class AppConfig implements TransactionManagementConfigurer {
   }
 }
 ```
-This approach may be desirable simply because it is more explicit, or it may be necessary in order to distinguish between two TransactionManager beans present in the same container. As the name suggests, the annotationDrivenTransactionManager() will be the one used for processing @Transactional methods. See TransactionManagementConfigurer Javadoc for further details.
-> 这种方法可能是可取的，因为它更明确，也可能是必要的，以便区分存在于同一容器中的两个 TransactionManager Bean。顾名思义，annotationDrivenTransactionManager() 将用于处理 @Transactional 方法。有关详细信息，请参阅 TransactionManagementConfigurer Javadoc。
+This approach may be desirable simply because it is more explicit, or it may be necessary in order to distinguish between two `TransactionManager` beans present in the same container. As the name suggests, the `annotationDrivenTransactionManager()` will be the one used for processing @Transactional methods. See `TransactionManagementConfigurer Javadoc` for further details.
+> 这种方法可能是可取的，因为它更明确，也可能是必要的，以便区分存在于同一容器中的两个 `TransactionManager` Bean。顾名思义，``annotationDrivenTransactionManager()`` 将用于处理 @Transactional 方法。有关详细信息，请参阅 `TransactionManagementConfigurer Javadoc`。
 
-The mode attribute controls how advice is applied: If the mode is AdviceMode.PROXY (the default), then the other attributes control the behavior of the proxying. Please note that proxy mode allows for interception of calls through the proxy only; local calls within the same class cannot get intercepted that way.
-> mode 属性控制建议的应用方式：如果模式为 AdviceMode.PROXY（默认），则其他属性控制代理的行为。 请注意，代理模式仅允许通过代理拦截调用； 同一类中的本地调用不能以这种方式被拦截。
+The mode attribute controls how advice is applied: If the mode is `AdviceMode.PROXY` (the default), then the other attributes control the behavior of the `proxying`. Please note that proxy mode allows for interception of calls through the proxy only; local calls within the same class cannot get intercepted that way.
+> mode 属性控制建议的应用方式：如果模式为 `AdviceMode.PROXY`（默认），则其他属性控制代理的行为。 请注意，代理模式仅允许通过代理拦截调用； 同一类中的本地调用不能以这种方式被拦截。
 
-Note that if the mode is set to AdviceMode.ASPECTJ, then the value of the proxyTargetClass attribute will be ignored. Note also that in this case the spring-aspects module JAR must be present on the classpath, with compile-time weaving or load-time weaving applying the aspect to the affected classes. There is no proxy involved in such a scenario; local calls will be intercepted as well.
-> 请注意，如果模式设置为 AdviceMode.ASPECTJ，那么 proxyTargetClass 属性的值将被忽略。还请注意，在这种情况下，classpath 上必须有 spring-aspects 模块 JAR，编译时编织或加载时编织会将 aspect 应用到受影响的类。这种情况下不涉及代理；本地调用也将被拦截。
+Note that if the mode is set to `AdviceMode.ASPECTJ`, then the value of the `proxyTargetClass` attribute will be ignored. Note also that in this case the spring-aspects module JAR must be present on the `classpath`, with compile-time weaving or load-time weaving applying the aspect to the affected classes. There is no proxy involved in such a scenario; local calls will be intercepted as well.
+> 请注意，如果模式设置为 `AdviceMode.ASPECTJ`，那么 `proxyTargetClass` 属性的值将被忽略。还请注意，在这种情况下，`classpath` 上必须有 spring-aspects 模块 JAR，编译时编织或加载时编织会将 aspect 应用到受影响的类。这种情况下不涉及代理；本地调用也将被拦截。
 
-#### 源代码
+#### `@EnableTransactionManagement`源代码
+
 ```java
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -135,14 +136,14 @@ public @interface EnableTransactionManagement {
 ```
 
 ### TransactionManagementConfigurer
-Interface to be implemented by @Configuration classes annotated with @EnableTransactionManagement that wish to (or need to) explicitly specify the default PlatformTransactionManager bean (or ReactiveTransactionManager bean) to be used for annotation-driven transaction management, as opposed to the default approach of a by-type lookup. One reason this might be necessary is if there are two PlatformTransactionManager beans (or two ReactiveTransactionManager beans) present in the container.
-> 一个接口，该接口将由使用了 @EnableTransactionManagement注解 的 @Configuration 类实现，这些类希望（或需要）显式地指定用于注释驱动事务管理的默认 PlatformTransactionManager Bean（或 ReactiveTransactionManager Bean），而不是采用按类型查找的默认方法。如果容器中有两个 PlatformTransactionManager Bean（或两个 ReactiveTransactionManager Bean），那么就有必要这样做。
+Interface to be implemented by @Configuration classes annotated with `@EnableTransactionManagement` that wish to (or need to) explicitly specify the default `PlatformTransactionManager` bean (or `ReactiveTransactionManager` bean) to be used for annotation-driven transaction management, as opposed to the default approach of a by-type lookup. One reason this might be necessary is if there are two `PlatformTransactionManager` beans (or two `ReactiveTransactionManager` beans) present in the container.
+> 一个接口，该接口将由使用了 `@EnableTransactionManagement`注解 的 @Configuration 类实现，这些类希望（或需要）显式地指定用于注释驱动事务管理的默认 `PlatformTransactionManager` Bean（或 `ReactiveTransactionManager` Bean），而不是采用按类型查找的默认方法。如果容器中有两个 `PlatformTransactionManager` Bean（或两个 `ReactiveTransactionManager` Bean），那么就有必要这样做。
 
-See @EnableTransactionManagement for general examples and context; see annotationDrivenTransactionManager() for detailed instructions.
-> 有关一般示例和上下文，请参阅 @EnableTransactionManagement；有关详细说明，请参阅 annotationDrivenTransactionManager()。
+See `@EnableTransactionManagement` for general examples and context; see `annotationDrivenTransactionManager()` for detailed instructions.
+> 有关一般示例和上下文，请参阅 `@EnableTransactionManagement`；有关详细说明，请参阅 `annotationDrivenTransactionManager()`。
 
-Note that in by-type lookup disambiguation cases, an alternative approach to implementing this interface is to simply mark one of the offending PlatformTransactionManager @Bean methods (or ReactiveTransactionManager @Bean methods) as @Primary. This is even generally preferred since it doesn't lead to early initialization of the TransactionManager bean.
-> 请注意，在按类型查找消除歧义的情况下，实现此接口的另一种方法是简单地将一个违规的 PlatformTransactionManager @Bean 方法（或 ReactiveTransactionManager @Bean 方法）标记为 @Primary 方法。这种方法通常更受欢迎，因为它不会导致 TransactionManager Bean 的过早初始化。
+Note that in by-type lookup disambiguation cases, an alternative approach to implementing this interface is to simply mark one of the offending `PlatformTransactionManager` @Bean methods (or `ReactiveTransactionManager` @Bean methods) as @Primary. This is even generally preferred since it doesn't lead to early initialization of the `TransactionManager` bean.
+> 请注意，在按类型查找消除歧义的情况下，实现此接口的另一种方法是简单地将一个违规的 `PlatformTransactionManager` @Bean 方法（或 `ReactiveTransactionManager` @Bean 方法）标记为 @Primary 方法。这种方法通常更受欢迎，因为它不会导致 `TransactionManager` Bean 的过早初始化。
 > 
 
 #### 源代码

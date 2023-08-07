@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.money.Money;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
 
 /**
  * @Description: Amount
@@ -29,11 +28,11 @@ public class Amount {
 
     @Column(name = "amount_total")
     @Type(type = "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyMinorAmount",
-            parameters = {@org.hibernate.annotations.Parameter(name = "currencyCode", value = "CNY")})
+            parameters = {@Parameter(name = "currencyCode", value = "CNY")})
     private Money totalAmount;
 
     @Column(name = "amount_pay")
     @Type(type = "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyMinorAmount", //PersistentMoneyAmountAndCurrency
-            parameters = {@org.hibernate.annotations.Parameter(name = "currencyCode", value = "CNY")})
+            parameters = {@Parameter(name = "currencyCode", value = "CNY")})
     private Money payAmount;
 }
