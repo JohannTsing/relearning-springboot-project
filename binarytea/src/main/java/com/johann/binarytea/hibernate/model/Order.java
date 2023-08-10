@@ -26,7 +26,7 @@ public class Order {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) //默认是 EAGER
     @JoinColumn(name = "maker_id",referencedColumnName = "id") // referencedColumnName: 关联表中被引用的列名，默认为被关联表的主键列
     private TeaMaker maker;
 

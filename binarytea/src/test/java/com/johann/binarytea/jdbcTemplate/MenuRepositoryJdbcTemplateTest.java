@@ -1,7 +1,7 @@
-package com.johann.binarytea.repository;
+package com.johann.binarytea.jdbcTemplate;
 
 import com.johann.binarytea.jdbcTemplate.model.MenuItem;
-import com.johann.binarytea.jdbcTemplate.repository.MenuRepository;
+import com.johann.binarytea.jdbcTemplate.repository.MenuRepositoryJdbcTemplate;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * <p>
+ * JdbcTemplate 测试类
  *
  * @author Johann
  * @version 1.0
@@ -33,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * 5, MethodOrderer.DisplayName.class 根据方法的显示名称按字母数字排序,此时测试方法上使用@DisplayName注解指定显示名称
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MenuRepositoryTest {
+public class MenuRepositoryJdbcTemplateTest {
 
     @Autowired
-    private MenuRepository menuRepository;
+    private MenuRepositoryJdbcTemplate menuRepository;
 
     /**
      * 测试查询菜单项总数

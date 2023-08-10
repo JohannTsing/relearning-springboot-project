@@ -45,7 +45,7 @@ public class DemoPrinterRunner implements ApplicationRunner {
         try {
             mixService.doSomething();
         } catch (Exception e) {
-            log.error("事务执行失败：{}", e.getMessage());
+            log.error("事务执行失败-：{}", e.getMessage());
         }finally {
             log.info("Names: {}", demoRepository.showNames());
         }

@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
  * @see
  **/
 @Repository
-public class MenuRepository {
+public class MenuRepositoryJdbcTemplate {
 
     public static final String SQL_INSERT_ITEM
-            = "insert into t_menu (name, size, price, create_time, update_time) values (?, ?, ?, now(), now())";
+            = "insert into t_menu_jdbc (name, size, price, create_time, update_time) values (?, ?, ?, now(), now())";
     private JdbcTemplate jdbcTemplate;
 
     // 2, 【一般】搭配@Autowired注解，使用Setter注入JdbcTemplate
@@ -55,7 +55,7 @@ public class MenuRepository {
      */
     public long countMenuItems() {
         return jdbcTemplate
-                .queryForObject("select count(*) from t_menu", Long.class);
+                .queryForObject("select count(*) from t_menu_jdbc", Long.class);
     }
 
     /**
@@ -63,7 +63,7 @@ public class MenuRepository {
      * @return
      */
     public List<MenuItem> queryAllItems() {
-        return jdbcTemplate.query("select * from t_menu", rowMapper());
+        return jdbcTemplate.query("select * from t_menu_jdbc", rowMapper());
     }
 
     /**
@@ -72,7 +72,7 @@ public class MenuRepository {
      * @return
      */
     public MenuItem queryForItem(Long id) {
-        return jdbcTemplate.queryForObject("select * from t_menu where id = ?",
+        return jdbcTemplate.queryForObject("select * from t_menu_jdbc where id = ?",
                 rowMapper(), id);
     }
 
@@ -120,7 +120,7 @@ public class MenuRepository {
      * @return
      */
     public int deleteItem(Long id) {
-        return jdbcTemplate.update("delete from t_menu where id = ?", id);
+        return jdbcTemplate.update("delete from t_menu_jdbc where id = ?", id);
     }
 
 
@@ -130,7 +130,7 @@ public class MenuRepository {
      * @return
      */
     public int insertItemWithNamedParameter(MenuItem item) {
-        String insert_sql = "insert into t_menu (name, size, price, create_time, update_time) values " +
+        String insert_sql = "insert into t_menu_jdbc (name, size, price, create_time, update_time) values " +
                 "(:name, :size, :price * 100, now(), now())";
 
         // 1, 使用 MapSqlParameterSource,MapSqlParameterSource会以Map 的形式来提供参数
@@ -190,7 +190,7 @@ public class MenuRepository {
      * @return
      */
     public int insertItemsWithNamedParameter(List<MenuItem> items) {
-        String sql = "insert into t_menu (name, size, price, create_time, update_time) values " +
+        String sql = "insert into t_menu_jdbc (name, size, price, create_time, update_time) values " +
                 "(:name, :size, :price * 100, now(), now())";
         int[] count = namedParameterJdbcTemplate.batchUpdate(sql, SqlParameterSourceUtils.createBatch(items));
         return Arrays.stream(count).sum();

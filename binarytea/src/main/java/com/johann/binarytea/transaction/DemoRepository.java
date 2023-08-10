@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 
 /**
  * 测试事务
- * 没有在XML文件中配置`<tx:annotation-driven/>`标签，也没有在配置类上添加 `@EnableTransactionManagement` 注解，为什么可以使用`@Transactional`注解？
+ * 没有在XML文件中配置`<tx:annotation-driven/>`标签，也没有在配置类上添加 `@EnableTransactionManagement` 注解，
+ * 为什么可以使用`@Transactional`注解？
+ *
  * 这是因为SpringBoot提供了支持事务的自动自配功能，在`TransactionAutoConfiguration`中的内部类`EnableTransactionManagementConfiguration`中添加了`@EnableTransactionManagement`注解。
  *
  * @author Johann
@@ -28,6 +30,7 @@ public class DemoRepository {
 
     private JdbcTemplate jdbcTemplate;
 
+    // 构造器注入，无需@Autowired注解
     public DemoRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -42,6 +45,9 @@ public class DemoRepository {
                 .stream().collect(Collectors.joining(","));
     }
 
+    /**
+     * Spring Framework 也提供了编程式事务的支持，它的核心是`TransactionTemplate`，它是一个模板类，用来简化编程式事务的使用。
+     */
     private TransactionTemplate transactionTemplate;
 
     //@Autowired
@@ -58,7 +64,7 @@ public class DemoRepository {
         return transactionTemplate.execute(new TransactionCallback<String>() {
             @Override
             public String doInTransaction(TransactionStatus status) {
-                return jdbcTemplate.queryForList("select name from t demo;", String.class)
+                return jdbcTemplate.queryForList("select name from t_demo;", String.class)
                         .stream().collect(Collectors.joining(","));
             }
         });
@@ -70,7 +76,7 @@ public class DemoRepository {
      */
     public String showNamesProgrammatically2() {
         return transactionTemplate.execute(
-                status -> jdbcTemplate.queryForList("select name from t demo;", String.class)
+                status -> jdbcTemplate.queryForList("select name from t_demo;", String.class)
                         .stream().collect(Collectors.joining(",")));
     }
 
@@ -113,6 +119,6 @@ public class DemoRepository {
     //@Transactional(propagation = Propagation.NESTED)
     public void insertRecordNested() {
         jdbcTemplate.update(SQL, "three");
-        throw new RuntimeException();
+        throw new RuntimeException("主动抛出异常，测试嵌套事务");
     }
 }

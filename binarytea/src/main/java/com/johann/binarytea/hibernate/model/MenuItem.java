@@ -29,10 +29,23 @@ import java.util.Date;
 public class MenuItem {
 
     @Id
-    @GeneratedValue //(strategy = GenerationType.IDENTITY)
-    // 除了自增主键，还可以用 @SequenceGenerator 和 @TaleGenerator 来指定基于序列和表生成主键
-    //@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence-generator")
-    //@SequenceGenerator(name = "sequence-generator", sequenceName = "seq_menu")
+    @GeneratedValue //默认：(strategy = GenerationType.AUTO)
+    /**
+     * 除了自增主键，还可以用 @SequenceGenerator 和 @TaleGenerator 来指定基于序列和表生成主键
+     * eg.1:
+     * @Id
+     * @GeneratedValue(strategy=SEQUENCE, generator="CUST_SEQ")
+     * @Column(name="CUST_ID")
+     *
+     * eg.2:
+     * @Id
+     * @GeneratedValue(strategy=TABLE, generator="CUST_GEN")
+     * @Column(name="CUST_ID")
+     *
+     * eg.3:
+     * @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence-generator")
+     * @SequenceGenerator(name = "sequence-generator", sequenceName = "seq_menu")
+     */
     private Long id;
 
     @Column(name = "name", nullable = false)

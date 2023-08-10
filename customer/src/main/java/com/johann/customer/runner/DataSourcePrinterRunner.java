@@ -1,4 +1,4 @@
-package com.johann.customer.datasource;
+package com.johann.customer.runner;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Setter;

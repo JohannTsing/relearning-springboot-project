@@ -1,5 +1,6 @@
 package com.johann.binarytea.transaction;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see
  **/
 @Service
+@Slf4j
 public class MixService {
 
     private DemoRepository demoRepository;
@@ -33,7 +35,7 @@ public class MixService {
         try {
             demoRepository.insertRecordNested();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("事务执行失败：{}", e.getMessage());
         }
 
         // example 3: Names: two

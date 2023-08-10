@@ -1,6 +1,6 @@
 package com.johann.binarytea.runner;
 
-import com.johann.binarytea.jdbcTemplate.repository.MenuRepository;
+import com.johann.binarytea.jdbcTemplate.repository.MenuRepositoryJdbcTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class MenuPrinterRunner implements ApplicationRunner {
 
-    private MenuRepository menuRepository;
+    private MenuRepositoryJdbcTemplate menuRepository;
 
-    public MenuPrinterRunner(MenuRepository menuRepository) {
+    public MenuPrinterRunner(MenuRepositoryJdbcTemplate menuRepository) {
         this.menuRepository = menuRepository;
     }
 

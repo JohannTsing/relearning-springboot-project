@@ -50,7 +50,7 @@ import java.util.Random;
 @Log4j2
 @EnableScheduling
 //基于XML的声明式事务
-@ImportResource("xml-transaction-config.xml")
+//@ImportResource("xml-transaction-config.xml")
 public class BinaryteaApplication {
 
     /**
