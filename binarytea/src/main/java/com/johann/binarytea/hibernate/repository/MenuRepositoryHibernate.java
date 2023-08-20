@@ -93,7 +93,7 @@ public class MenuRepositoryHibernate extends HibernateDaoSupport {
     }
 
     /**
-     * TODO
+     * TODO HibernateTemplate 的其他查询方式
      * 1，getHibernateTemplate().findByCriteria()
      * 2，getHibernateTemplate().findByExample()
      */

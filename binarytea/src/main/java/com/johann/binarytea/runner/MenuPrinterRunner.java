@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @Order(1)
+// 当测试属性 when.test.jpa 的值为 false 时，即此时不是测试的Spring Data，才会执行该类中的代码
 @ConditionalOnProperty(name = "when.test.jpa", havingValue = "false" ,matchIfMissing = false)
 public class MenuPrinterRunner implements ApplicationRunner {
 

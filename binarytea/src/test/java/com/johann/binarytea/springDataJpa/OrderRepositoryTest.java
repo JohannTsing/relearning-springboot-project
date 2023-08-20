@@ -1,5 +1,6 @@
 package com.johann.binarytea.springDataJpa;
 
+import com.johann.binarytea.BinaryteaApplication;
 import com.johann.binarytea.hibernate.model.*;
 import com.johann.binarytea.springDataJpa.repository.OrderRepositoryJpa;
 import org.joda.money.CurrencyUnit;
@@ -26,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
  **/
 @SpringBootTest(properties = {"when.test.jpa=true",
         "spring.sql.init.mode=never",
-        "spring.jpa.hibernate.ddl-auto=create-drop"})
+        "spring.jpa.hibernate.ddl-auto=create-drop"},
+    classes = BinaryteaApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrderRepositoryTest {
 

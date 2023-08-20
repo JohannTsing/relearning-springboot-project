@@ -2,6 +2,7 @@ package com.johann.binarytea.hibernate.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
@@ -20,8 +21,9 @@ import java.util.Properties;
  **/
 
 // 使用 Spring Data JPA 相关的配置,注释掉 Hibernate 相关的配置
-//@Configuration
+@Configuration
 @Slf4j
+@ConditionalOnProperty(name = "when.test.hibernate", havingValue = "true",matchIfMissing = false)
 public class HibernateConfig {
 
     /**

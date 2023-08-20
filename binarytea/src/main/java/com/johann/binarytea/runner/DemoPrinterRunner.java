@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  * @see
  **/
-//@Component
+@Component
 @Slf4j
 @Order(2)
+// 当测试属性 when.test.jpa 的值为 false 时，即此时不是测试的Spring Data，才会执行该类中的代码
+@ConditionalOnProperty(name = "when.test.jpa", havingValue = "false" ,matchIfMissing = false)
 public class DemoPrinterRunner implements ApplicationRunner {
 
     private DemoRepository demoRepository;

@@ -1,4 +1,4 @@
-package com.johann.binarytea.springDataJpa;
+package com.johann.binarytea.runner;
 
 import com.johann.binarytea.hibernate.model.*;
 import com.johann.binarytea.springDataJpa.repository.MenuRepositoryJpa;
@@ -12,7 +12,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,7 +25,9 @@ import java.util.stream.Stream;
  **/
 @Component
 @Slf4j
+// 该类中有同名的Order，所以需要引入全限定名
 @org.springframework.core.annotation.Order(3)
+// 当测试属性 when.test.jpa 的值为 true 时，才会执行该类中的代码
 @ConditionalOnProperty(name = "when.test.jpa", havingValue = "true")
 public class SpringDataInitializationRunner implements ApplicationRunner {
 

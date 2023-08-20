@@ -27,7 +27,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.0
  * @see
  **/
-@SpringBootTest(classes = BinaryteaApplication.class)
+@SpringBootTest(properties = {"when.test.hibernate=true",
+        // 禁用 Spring Data JPA 的自动配置
+        // TODO 如果不禁用，报错原因排查
+        // "spring.data.jpa.repositories.enabled=false"
+        },
+        classes = BinaryteaApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MenuRepositoryHibernateTest {
 
