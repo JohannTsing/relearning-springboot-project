@@ -4,31 +4,50 @@ import com.johann.binarytea.hibernate.model.*;
 import com.johann.binarytea.springDataJpa.repository.MenuRepositoryJpa;
 import com.johann.binarytea.springDataJpa.repository.OrderRepositoryJpa;
 import com.johann.binarytea.springDataJpa.repository.TeaMakerRepositoryJpa;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>
+ * 使用 ApplicationRunner 接口，实现在 Spring Boot 启动后执行的代码【插入Spring Data 待测试的数据】
  *
  * @author Johann
  * @version 1.0
  * @see
  **/
-public class DataInitializationRunner implements ApplicationRunner {
+@Component
+@Slf4j
+@org.springframework.core.annotation.Order(3)
+@ConditionalOnProperty(name = "when.test.jpa", havingValue = "true")
+public class SpringDataInitializationRunner implements ApplicationRunner {
+
+    private TeaMakerRepositoryJpa makerRepository;
+    private MenuRepositoryJpa menuRepository;
+    private OrderRepositoryJpa orderRepository;
 
     @Autowired
-    private TeaMakerRepositoryJpa makerRepository;
+    public void setMakerRepository(TeaMakerRepositoryJpa makerRepository) {
+        this.makerRepository = makerRepository;
+    }
+
     @Autowired
-    private MenuRepositoryJpa menuRepository;
+    public void setMenuRepository(MenuRepositoryJpa menuRepository) {
+        this.menuRepository = menuRepository;
+    }
+
     @Autowired
-    private OrderRepositoryJpa orderRepository;
+    public void setOrderRepository(OrderRepositoryJpa orderRepository) {
+        this.orderRepository = orderRepository;
+    }
 
     /**
      * Callback used to run the bean.
