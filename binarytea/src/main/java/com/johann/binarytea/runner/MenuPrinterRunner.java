@@ -4,6 +4,7 @@ import com.johann.binarytea.jdbcTemplate.repository.MenuRepositoryJdbcTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @Order(1)
+@ConditionalOnProperty(name = "when.test.jpa", havingValue = "false" ,matchIfMissing = false)
 public class MenuPrinterRunner implements ApplicationRunner {
 
     private MenuRepositoryJdbcTemplate menuRepository;

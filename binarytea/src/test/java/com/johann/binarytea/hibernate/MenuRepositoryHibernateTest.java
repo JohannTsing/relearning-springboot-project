@@ -127,4 +127,5 @@ public class MenuRepositoryHibernateTest {
         assertEquals(item.getSize().name(), result.get("size"));
         assertEquals(item.getPrice().getAmount(), new BigDecimal(result.get("price").toString()));
     }
+
 }

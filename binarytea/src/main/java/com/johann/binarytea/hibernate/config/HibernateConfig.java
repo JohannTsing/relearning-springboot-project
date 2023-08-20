@@ -18,7 +18,9 @@ import java.util.Properties;
  * @version 1.0
  * @see
  **/
-@Configuration
+
+// 使用 Spring Data JPA 相关的配置,注释掉 Hibernate 相关的配置
+//@Configuration
 @Slf4j
 public class HibernateConfig {
 

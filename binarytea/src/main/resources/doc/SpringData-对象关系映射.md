@@ -78,7 +78,7 @@ Hibernate 与 JPA 需要配置的内容:
 
 Spring Boot 的 HibernateJpaConfiguration 提供了一整套完整的自动配置。如果我们不想自己动手，可以把配置的工作交给Spring Boot，只需要确保有一个明确的主DataSource Bean 即可。
 
-手动配置Hibermate 的相关Bean: 
+##### 手动配置Hibermate 的相关Bean
 ```java
 @Configuration
 public class HibernateConfig {
@@ -125,3 +125,106 @@ public class HibernateConfig {
     }
 }
 ```
+
+##### Hibernate API 操作数据库
+```java
+/**
+ * HibernateDaoSupport 辅助类是一个方便的超类，用于简化 Hibernate 数据访问代码。
+ * 它包含一个 HibernateTemplate，可以用于管理 Hibernate Session 的创建和关闭。
+ * 通过继承 HibernateDaoSupport，可以将 HibernateTemplate 注入到数据访问对象中。
+ *
+ * HibernateDaoSupport 与 HibernateTemplate 的区别在于：
+ * HibernateTemplate 是一个模板类，它封装了所有的 Hibernate 操作，包括创建和关闭 Session，加载对象，保存对象，删除对象，查询对象等。
+ * HibernateDaoSupport 是一个抽象类，它提供了一个 HibernateTemplate 对象，用于简化 Hibernate 数据访问代码。
+ *
+ * @author Johann
+ * @version 1.0
+ * @see
+ **/
+@Repository
+// @Transactional 事务一般加在 Service 层上
+@Transactional
+public class MenuRepositoryHibernate extends HibernateDaoSupport {
+
+    /**
+     * 通过构造函数注入 SessionFactory
+     * @param sessionFactory
+     */
+    public MenuRepositoryHibernate(SessionFactory sessionFactory){
+        super.setSessionFactory(sessionFactory);
+    }
+
+    /**
+     * 获取菜单项数量
+     * @return
+     */
+    public long countMenuItems() {
+        // 使用 HQL 查询语言
+        return getHibernateTemplate().execute(session ->
+                session.createQuery("select count(m) from MenuItem m", Long.class).uniqueResult());
+    }
+
+    public long countMenuItems2() {
+        // 使用 HQL 查询语言
+        return getSessionFactory().getCurrentSession()
+                .createQuery("select count(m) from MenuItem m",Long.class).getSingleResult();
+    }
+
+    /**
+     * 查询所有的菜单项
+     * @return
+     */
+    public List<MenuItem> queryAllItems(){
+        return getHibernateTemplate().loadAll(MenuItem.class);
+    }
+
+    /**
+     * 根据 id 获取菜单项
+     * @param id
+     * @return
+     */
+    public MenuItem queryForItem(Long id){
+        return getHibernateTemplate().get(MenuItem.class,id);
+    }
+
+    /**
+     * 插入菜单项
+     * @param menuItem
+     */
+    public void insertItem(MenuItem menuItem){
+        getHibernateTemplate().save(menuItem);
+    }
+
+    /**
+     * 更新菜单项
+     * @param item
+     */
+    public void updateItem(MenuItem item) {
+        getHibernateTemplate().update(item);
+    }
+
+    /**
+     * 删除菜单项
+     * @param id
+     */
+    public void deleteItem(Long id) {
+        getHibernateTemplate().delete(Objects.requireNonNull(queryForItem(id)));
+    }
+}
+```
+
+#### 使用 Spring Data JPA
+Spring Data 项目为不同的常见数据库提供了统一的 Repository 抽象层。我们可以通过约定好的方式定义接口，使用其中的方法来声明需要的操作，剩下的实现工作完全交由 Spring Data 来完成。
+
+Spring Data的核心接口是 `Repository<T,ID>`，T是实体类型，ID 是主键类型。
+一般我们会使用它的子接口 `CrudRepository<T,ID>`或者`PagingAndSortingRepository<T,ID>`。
+
+`CrudRepository<T,ID>`提供了最基本的对实体类的添删改查操作，继承它就拥有了这些方法。`PagingAndSortingRepository<T,ID>`继承`CrudRepository<T,ID>`，在此基础上提供了分页与排序功能。
+
+Spring DataJPA 是专门针对JPA 的，提供了一个专属的 `JpaRepository<T,ID>`接口，可以在配置类上增加`@EnableJpaRepositories` 来开启 JPA 的支持，通过这个注解还可以配置一些个性化的信息，比如要扫描Repository 接口的包。
+
+Spring Boot 的`JpaRepositoriesAutoConfiguration` 提供了 JpaRepository 相关的自动配置，只要符合条件就能完成配置。
+在 SpringBoot 项目里无须自己添加该注解`@EnableJpaRepositories`，只要有相应的依赖，Spring Boot 的自动配置就能帮忙完成剩下的工作。
+
+
+

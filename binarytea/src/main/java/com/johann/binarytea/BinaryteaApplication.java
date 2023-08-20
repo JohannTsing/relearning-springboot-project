@@ -57,23 +57,23 @@ public class BinaryteaApplication {
      * Spring Boot应用的入口，main方法，用于启动应用程序。
      * @param args
      */
-//    public static void main(String[] args) {
-//        SpringApplication.run(BinaryteaApplication.class, args);
-//    }
+    public static void main(String[] args) {
+        SpringApplication.run(BinaryteaApplication.class, args);
+    }
 
     /**
      * 自定义SpringApplication，用于启动应用程序。
      * @param args
      */
-    public static void main(String[] args) {
-        new SpringApplicationBuilder()
-                .sources(BinaryteaApplication.class)
-                .main(BinaryteaApplication.class)
-                .bannerMode(Banner.Mode.LOG)
-                //.banner(new MyBanner())
-                .web(WebApplicationType.SERVLET)
-                .run(args);
-    }
+//    public static void main(String[] args) {
+//        new SpringApplicationBuilder()
+//                .sources(BinaryteaApplication.class)
+//                .main(BinaryteaApplication.class)
+//                .bannerMode(Banner.Mode.LOG)
+//                //.banner(new MyBanner())
+//                .web(WebApplicationType.SERVLET)
+//                .run(args);
+//    }
 
 
 
