@@ -22,7 +22,7 @@ Hibernate 与 JPA 接口的对应关系与实现：
 | EntityManagerFactory | SessionFactory | SessionFactoryImpl | 管理领域模型与数据库的映射关系       |
 | EntityManager        | Session        | SessionImpl        | 基本的工作单元，封装了连接与事务相关的内容 |
 | EntityTransaction    | Transaction    | TransactionImpl    | 用来抽象底层的事务细节           |
-虽然`SessionFactory`或`EntityManagerFactory` 的创建成本比较高，好在它们是线程安全的。一般应用程序中只有一个实例，而且会在程序中共享。
+> 虽然`SessionFactory`或`EntityManagerFactory` 的创建成本比较高，好在它们是线程安全的。一般应用程序中只有一个实例，而且会在程序中共享。
 
 #### 定义实体对象
 
@@ -81,6 +81,8 @@ Spring Boot 的 HibernateJpaConfiguration 提供了一整套完整的自动配�
 ##### 手动配置Hibermate 的相关Bean
 ```java
 @Configuration
+@Slf4j
+@ConditionalOnProperty(name = "when.test.hibernate", havingValue = "true")
 public class HibernateConfig {
 
     /**
@@ -91,27 +93,52 @@ public class HibernateConfig {
      * 它会自动扫描类路径下的所有实体类，映射到对应的数据库表。
      * 它还可以配置 Hibernate 的各种属性，如数据库方言、是否显示 SQL 等等。
      *
-     * 会话工厂是一个重量级对象，所以通常情况下一个应用程序只需要一个会话工厂。
+     * 会话工厂（SessionFactory）是一个重量级对象，所以通常情况下一个应用程序只需要一个会话工厂。
      * 会话工厂是创建会话的工厂，会话是持久化操作的主要接口。
      * 会话工厂是线程安全的，所以它可以在多个线程之间共享。它通常在应用程序启动时创建，然后在整个应用程序生命周期中使用。
      * @param dataSource
      * @return
      */
-    @Bean
+    @Bean(name = "entityManagerFactory")
     public LocalSessionFactoryBean sessionFactory(DataSource dataSource){
+        log.info("会话工厂初始化");
+        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+        sessionFactoryBean.setDataSource(dataSource);
+        sessionFactoryBean.setHibernateProperties(hibernateProperties());
+        sessionFactoryBean.setPackagesToScan("com.johann.binarytea.hibernate.model");
+        return sessionFactoryBean;
+    }
+
+    /**
+     * 本地容器实体管理器工厂 bean，用于创建 JPA 的 EntityManagerFactory。
+     * 它会自动扫描类路径下的所有实体类，映射到对应的数据库表。
+     * 它还可以配置 JPA 的各种属性，如数据库方言、是否显示 SQL 等等。
+     *
+     * 实体管理器工厂（EntityManagerFactory）是一个重量级对象，所以通常情况下一个应用程序只需要一个实体管理器工厂。
+     * 实体管理器工厂和会话工厂类似，都是创建会话的工厂，会话是持久化操作的主要接口。
+     * 实体管理器工厂是 JPA 的核心接口，它负责创建 EntityManager。
+     * 实体管理器工厂是线程安全的，所以它可以在多个线程之间共享。它通常在应用程序启动时创建，然后在整个应用程序生命周期中使用。
+     * @return
+     */
+//    @Bean
+//    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+//        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+//        em.setDataSource(dataSource);
+//        em.setPackagesToScan("com.johann.binarytea.hebernate.model");
+//        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+//        em.setJpaProperties(hibernateProperties());
+//        return em;
+//    }
+
+    private Properties hibernateProperties() {
         Properties properties = new Properties();
         // hibernate.hbm2ddl,auto，自动根据实体类生成DDL语句并执行，create-drop表示每次启动时都重新创建表结构
         properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
-        // hibernate.show sgl，打印 Hibernate 具体执行的 SOL 语句;
+        // hibernate.show sgl，打印 Hibernate 具体执行的 SQL 语句;
         properties.setProperty("hibernate.show_sql", "true");
         // hibernate.format_sql，格式化 SQL 语句，便于阅读
         properties.setProperty("hibernate.format_sql", "true");
-
-        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
-        sessionFactoryBean.setDataSource(dataSource);
-        sessionFactoryBean.setHibernateProperties(properties);
-        sessionFactoryBean.setPackagesToScan("com.johann.binarytea.hibernate.model");
-        return sessionFactoryBean;
+        return properties;
     }
 
     /**
@@ -121,7 +148,12 @@ public class HibernateConfig {
      */
     @Bean
     public PlatformTransactionManager transactionManager(SessionFactory sessionFactory){
-        return new HibernateTransactionManager(sessionFactory);
+        log.info("事务管理器初始化");
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory);
+        log.info("事务管理器是否允许嵌套事务：{}", transactionManager.isNestedTransactionAllowed());
+        transactionManager.setNestedTransactionAllowed(true);
+        log.info("事务管理器是否允许嵌套事务：{}", transactionManager.isNestedTransactionAllowed());
+        return transactionManager;
     }
 }
 ```
@@ -218,13 +250,55 @@ Spring Data 项目为不同的常见数据库提供了统一的 Repository 抽�
 
 Spring Data的核心接口是 `Repository<T,ID>`，T是实体类型，ID 是主键类型。
 一般我们会使用它的子接口 `CrudRepository<T,ID>`或者`PagingAndSortingRepository<T,ID>`。
-
 `CrudRepository<T,ID>`提供了最基本的对实体类的添删改查操作，继承它就拥有了这些方法。`PagingAndSortingRepository<T,ID>`继承`CrudRepository<T,ID>`，在此基础上提供了分页与排序功能。
 
-Spring DataJPA 是专门针对JPA 的，提供了一个专属的 `JpaRepository<T,ID>`接口，可以在配置类上增加`@EnableJpaRepositories` 来开启 JPA 的支持，通过这个注解还可以配置一些个性化的信息，比如要扫描Repository 接口的包。
+Spring DataJPA 是专门针对JPA 的，在 pomxml 中引人 org.springframework.boot:spring-bootstarter-data-jpa 就能添加所需的依赖。
+其中提供了一个专属的 `JpaRepository<T,ID>`接口，可以在配置类上增加`@EnableJpaRepositories` 来开启 JPA 的支持，通过这个注解还可以配置一些个性化的信息，比如要扫描Repository 接口的包。
 
-Spring Boot 的`JpaRepositoriesAutoConfiguration` 提供了 JpaRepository 相关的自动配置，只要符合条件就能完成配置。
-在 SpringBoot 项目里无须自己添加该注解`@EnableJpaRepositories`，只要有相应的依赖，Spring Boot 的自动配置就能帮忙完成剩下的工作。
+Spring Boot 的`JpaRepositoriesAutoConfiguration` 提供了 `JpaRepository` 相关的自动配置，只要符合条件就能完成配置。
+它通过 `@Import` 注解导人了 `JpaRepositoriesRegistrar` 类，其中直接定义了一个静态内部类 `EnableJpaRepositoriesConfiguration`，
+上面添加了 `@EnableJpaRepositories`，所以在 SpringBoot项目里无须自己添加该注解，只要有相应的依赖，Spring Boot 的自动配置就能帮忙完成剩下的工作
+
+> 在 SpringBoot 2.7 中，是通过`@Import`注解添加了一个 `JpaRepositoriesImportSelector`静态内部类，在这个类中根据需要选择引入`EnversRevisionRepositoriesRegistrar`或`JpaRepositoriesRegistrar`。
+> 在这两个类中，都定义了一个静态内部类`EnableJpaRepositoriesConfiguration`，该内部类添加了 `@EnableJpaRepositories`。
+
+##### JPA 查询的基本操作
+要定义自己的Repository 只需扩展`CrudRepository<T,ID>`、`PagingAndSortingRepository<T,ID>`或`JpaRepository<T,ID>`，并明确指定泛型类型即可。
+
+> 如果有一些公共的方法希望能剥离到公共接口里，但又不希望这个公共接口被创建成 Repository的Bean，这时就可以在接口上添加`@NoRepositoryBean` 注解。
+> JpaRepository 接口就是这样的:它继承了`PagingAndSortingRepository`，但是没有添加`@Repository`注解，所以它不会被创建成Bean。
+
+通用的方法基本能满足大部分需求，但是总会有一些业务所需的特殊查询需要是通用的方法所不能满足的。在 Spring Data 的帮助下，我们只需要根据它的要求定义方法，无须编写具体的实现这就省却了很多工作。
+以下几种形式的方法名都可以视为有效的查询方法:
+- find...By...
+- read...By...
+- query...By...
+- get...By...
+- count...By... (只返回结果数量)
+
+第一段“...”的内容是限定返回的结果条数，比如用`TopN`、`FirstN`表示返回头 N 个结果还可以用 `Distinct` 起到 SQL 语句中 distinct 关键词的效果。
+第二段“...”的内容是查询的条件也就是 SQL 语句中 where 的部分，条件所需的内容与方法的参数列表对应，可以通过 And、or 关键词组合多个条件，用 Not 关键词取反。
+
+Spring Data 查询方法支持的关键词:
+
+| 作用 | 关键词 | 示例 | SQL对应 |
+|----|----|----|
+| 相等 | Is、Equals，不写的话默认就是相等 | findByNameIs(String name) | … where x.name = ? |
+| 比较 | LessThan、LessThanEqual、GreaterThan、GreaterThanEqual | findByAgeLessThan(int age) | … where x.age < ? |
+| 比较 | Between，可用于日期时间的比较 | findByStartDateBetween(Date d1, Date d2) | … where x.startDate between ? and ? |
+| 比较 | Before、After，用于日期时间的比较 | findByStartDateBefore(Date d) | … where x.startDate < ? |
+| 是否为空 | Null、IsNull、NotNull、NotNull | findByNameIsNull() | … where x.name is null |
+| 相似 | Like、NotLike | findByNameLike(String name) | … where x.name like ? |
+| 字符串判断 | Startingwith、Endingwith、 Containing | findByNameStartingWith(String name) | … where x.name like ? |
+| 忽略字符串大小写 | IgnoreCase、AllIgnoreCase | findByLastnameAndFirstnameAllIgnoreCase(String lastname, String firstname) | … where UPPER(x.lastname) = UPPER(?) and UPPER(x.firstname) = UPPER(?) |
+| 集合 | In、NotIn | findByAgeIn(Collection ages) | … where x.age in ? |
+| 布尔判断 | True、False | findByActiveTrue() | … where x.active = true |
+| 排序 | OrderBy | findByNameOrderByAgeDescName(String name) | … where x.name = ? order by x.age desc, x.name |
+> 排序的时候，也可以在参数中添加一个 Sort 类型的参数灵活地传入期望的排序方式：
+> Sort sort = Sort.by("name").descending().and(Sort.by("id").ascending());
 
 
+另一个常见的需求是分页。方法的返回值可以是 Page<T> 或集合类型，通过传入 `Pageable`类型的参数来指定分页信息。
+
+Spring Data的 Repository 接口方法支持很多种返回类型:单个返回值的，除了常见的T类型也可以是`Optional<T>`;集合类型除了 `Iterable` 相关的类型，还可以是 `Streamable` 的，方便做流式处理。
 

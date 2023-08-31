@@ -9,7 +9,9 @@ import org.joda.money.Money;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -29,8 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  **/
 @SpringBootTest(properties = {"when.test.hibernate=true",
         // 禁用 Spring Data JPA 的自动配置
-        // TODO 如果不禁用，报错原因排查
-        // "spring.data.jpa.repositories.enabled=false"
+        "spring.data.jpa.repositories.enabled=false",
         },
         classes = BinaryteaApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -127,10 +128,14 @@ public class MenuRepositoryHibernateTest {
     }
 
     private void assertItem(Long id, MenuItem item){
-        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT * FROM t_menu WHERE id = ?", id);
-        assertEquals(item.getName(), result.get("name"));
-        assertEquals(item.getSize().name(), result.get("size"));
-        assertEquals(item.getPrice().getAmount(), new BigDecimal(result.get("price").toString()));
+//        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT * FROM t_menu WHERE id = ?", id);
+//        assertEquals(item.getName(), result.get("name"));
+//        assertEquals(item.getSize().name(), result.get("size"));
+//        assertEquals(item.getPrice().getAmount(), new BigDecimal(result.get("price").toString()));
+        MenuItem findResult = menuRepository.queryForItem(id);
+        assertEquals(item.getName(), findResult.getName());
+        assertEquals(item.getSize().name(), findResult.getSize().name());
+        assertEquals(item.getPrice().getAmount(), findResult.getPrice().getAmount());
     }
 
 }

@@ -1,31 +1,7 @@
-package com.johann.binarytea.hibernate.config;
-
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import javax.sql.DataSource;
-import java.util.Properties;
-
-/**
- * Hibernate 配置类
- *
- * @author Johann
- * @version 1.0
- * @see
- **/
-
-// 使用 Spring Data JPA 相关的配置,注释掉 Hibernate 相关的配置
+```java
 @Configuration
 @Slf4j
-@ConditionalOnProperty(name = "when.test.hibernate", havingValue = "true")
+@ConditionalOnProperty(name = "when.test.hibernate", havingValue = "true",matchIfMissing = false)
 public class HibernateConfig {
 
     /**
@@ -61,6 +37,7 @@ public class HibernateConfig {
      * 实体管理器工厂和会话工厂类似，都是创建会话的工厂，会话是持久化操作的主要接口。
      * 实体管理器工厂是 JPA 的核心接口，它负责创建 EntityManager。
      * 实体管理器工厂是线程安全的，所以它可以在多个线程之间共享。它通常在应用程序启动时创建，然后在整个应用程序生命周期中使用。
+     * @param dataSource
      * @return
      */
 //    @Bean
@@ -99,3 +76,40 @@ public class HibernateConfig {
         return transactionManager;
     }
 }
+```
+
+### 1, 使用Hibernate时，不手动配置会话工厂，可能产生的异常
+
+#### 1.1, Write operations are not allowed in read-only mode (FlushMode.MANUAL)
+```text
+org.springframework.dao.InvalidDataAccessApiUsageException: Write operations are not allowed in read-only mode (FlushMode.MANUAL): Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.
+```
+#### 1.2, No CurrentSessionContext configured!
+```text
+org.springframework.orm.jpa.JpaSystemException: No CurrentSessionContext configured!; nested exception is org.hibernate.HibernateException: No CurrentSessionContext configured!
+
+# 配置 current_session_context_class
+# spring.jpa.properties.hibernate.current_session_context_class=org.springframework.orm.hibernate5.SpringSessionContext
+```
+
+### 2, 同时使用Hibernate和SpringDataJPA时，手动配置会话工厂，可能产生的异常
+
+#### 2.1, No bean named 'entityManagerFactory' available
+```text
+org.springframework.beans.factory.NoSuchBeanDefinitionException: No bean named 'entityManagerFactory' available
+
+@Bean(name = "entityManagerFactory")
+```
+这是因为Hibernate的会话工厂名称覆盖了`entityManagerFactory`，解决办法是，将Hibernate的会话工厂名称改为`entityManagerFactory`。
+
+#### 2.2, expected single matching bean but found 2: sessionFactory,entityManagerFactory
+```text
+org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'javax.persistence.EntityManagerFactory' available: expected single matching bean but found 2: sessionFactory,entityManagerFactory
+```
+这是因为同时创建了Hibernate的会话工厂和JPA的实体管理器工厂，解决办法是，删除Hibernate的会话工厂，或删除JPA的实体管理器工厂。
+
+`SessionFactory`或`EntityManagerFactory` 的创建成本比较高，好在它们是线程安全的。一般应用程序中只有一个实例，而且会在程序中共享。
+
+
+[3 个常见的 Hibernate 性能问题以及如何在日志文件中查找它们](https://www.baeldung.com/hibernate-common-performance-problems-in-logs)
+[初始化懒关联的 5 种方法及使用时机](https://thorben-janssen.com/5-ways-to-initialize-lazy-relations-and-when-to-use-them/)

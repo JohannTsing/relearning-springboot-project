@@ -1,11 +1,15 @@
 package com.johann.binarytea.hibernate.repository;
 
 import com.johann.binarytea.hibernate.model.MenuItem;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,9 +33,16 @@ public class MenuRepositoryHibernate extends HibernateDaoSupport {
 
     /**
      * 通过构造函数注入 SessionFactory
-     * @param sessionFactory
      */
-    public MenuRepositoryHibernate(SessionFactory sessionFactory){
+//    public MenuRepositoryHibernate(SessionFactory sessionFactory){
+//        super.setSessionFactory(sessionFactory);
+//    }
+
+    /**
+     * 通过构造函数注入 EntityManagerFactory
+     */
+    public MenuRepositoryHibernate(EntityManagerFactory entityManagerFactory){
+        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
         super.setSessionFactory(sessionFactory);
     }
 
@@ -73,6 +84,7 @@ public class MenuRepositoryHibernate extends HibernateDaoSupport {
      * @param menuItem
      */
     public void insertItem(MenuItem menuItem){
+        //getSessionFactory().getCurrentSession().setHibernateFlushMode(FlushMode.COMMIT);
         getHibernateTemplate().save(menuItem);
     }
 

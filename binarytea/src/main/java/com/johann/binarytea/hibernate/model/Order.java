@@ -30,7 +30,7 @@ public class Order {
     @JoinColumn(name = "maker_id",referencedColumnName = "id") // referencedColumnName: 关联表中被引用的列名，默认为被关联表的主键列
     private TeaMaker maker;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY) //默认是 LAZY
     @JoinTable(name = "t_order_item", // 中间表的名称
             joinColumns = @JoinColumn(name = "item_id"), // 连接当前表的外键列
             inverseJoinColumns = @JoinColumn(name = "order_id")) // 连接关联表的外键列

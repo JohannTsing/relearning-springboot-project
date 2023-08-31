@@ -32,8 +32,8 @@ public class TeaMaker {
     private String name;
 
     // @OneToMany 的获取方式默认是懒加载，即在使用时才会加载，mappedBy 标明了根据 Order.maker 属性来进行映射。
+    @OneToMany(mappedBy = "maker", fetch = FetchType.LAZY) //默认是 LAZY
     // @OrderBy 会对取得的结果进行排序，默认按主键排序，也可以指定多个字段用逗号分隔，默认是升序(即 asc)。
-    @OneToMany(mappedBy = "maker", fetch = FetchType.LAZY)
     @OrderBy("id desc")
     private List<Order> orders = new ArrayList<>();
 
