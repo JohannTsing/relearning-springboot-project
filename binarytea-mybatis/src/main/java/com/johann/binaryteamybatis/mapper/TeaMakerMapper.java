@@ -30,8 +30,9 @@ public interface TeaMakerMapper {
             @Result(property = "name", column = "name"),
             @Result(property = "orders", column = "id",
                     // 通过 @Many 注解来实现一对多的关联查询, 通过 select 属性指定关联查询的方法, 通过 fetchType 属性指定延迟加载
-                    many = @Many(select = "com.johann.binaryteamybatis.mapper.OrderMapper.findByMakerId",
-                            fetchType = FetchType.LAZY,resultMap = "orderMap")
+                    many = @Many(select = "com.johann.binaryteamybatis.mapper.OrderMapper.findByMakerId"
+                            //,fetchType = FetchType.LAZY,resultMap = "orderMap"
+                    )
             ),
             @Result(property = "createTime", column = "create_time"),
             @Result(property = "updateTime", column = "update_time")
@@ -53,11 +54,11 @@ public interface TeaMakerMapper {
 
     /**
      * 分页查询
+     * @param pageNum
      * @param pageSize
-     * @param pageNumber
      * @return
      */
     @Select("select * from t_tea_maker")
     @ResultMap("teaMakerMap")
-    List<TeaMaker> findAllWithPage(int pageSize, int pageNumber);
+    List<TeaMaker> findAllWithPage(int pageNum, int pageSize);
 }

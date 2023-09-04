@@ -25,7 +25,7 @@ public interface OrderMapper {
     @Insert("insert into t_order(maker_id, status, amount_discount, amount_pay, amount_total, create_time, update_time) " +
             // 保存 status时, 使用 EnumOrdinalTypeHandler 类型处理器，它能够保存序号。
             "values (#{maker.id}, #{status,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}, " +
-            "#{amount.discount}, #{amount.payAmount}, #{amount.totalAmount}, now(), now()")
+            "#{amount.discount}, #{amount.payAmount}, #{amount.totalAmount}, now(), now())")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int save(Order order);
 
@@ -42,18 +42,22 @@ public interface OrderMapper {
     @Select("select * from t_order where id = #{id}")
     @Results(id = "orderMap", value = {
             @Result(property = "id", column = "id", id = true),
+            @Result(property = "status", column = "status",
+                    typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler.class),
             @Result(property = "amount.discount", column = "amount_discount"),
             @Result(property = "amount.totalAmount", column = "amount_total"),
             @Result(property = "amount.payAmount", column = "amount_pay"),
             @Result(property = "createTime", column = "create_time"),
             @Result(property = "updateTime", column = "update_time"),
             @Result(property = "maker", column = "maker_id",
-                    one = @One(select = "com.johann.binaryteamybatis.mapper.TeaMakerMapper.findById",
-                            fetchType = FetchType.LAZY,resultMap = "teaMakerMap")
+                    one = @One(select = "com.johann.binaryteamybatis.mapper.TeaMakerMapper.findById"
+                            ,fetchType = FetchType.LAZY
+                    )
             ),
             @Result(property = "items", column = "id",
-                    many = @Many(select = "com.johann.binaryteamybatis.mapper.MenuItemMapper.findByOrderId",
-                            fetchType = FetchType.LAZY)
+                    many = @Many(select = "com.johann.binaryteamybatis.mapper.MenuItemMapper.findByOrderId"
+                            ,fetchType = FetchType.LAZY
+                    )
             )
     })
     Order findById(Long id);
