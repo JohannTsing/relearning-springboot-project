@@ -112,4 +112,5 @@ org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying
 
 
 [3 个常见的 Hibernate 性能问题以及如何在日志文件中查找它们](https://www.baeldung.com/hibernate-common-performance-problems-in-logs)
+
 [初始化懒关联的 5 种方法及使用时机](https://thorben-janssen.com/5-ways-to-initialize-lazy-relations-and-when-to-use-them/)

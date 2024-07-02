@@ -32,5 +32,7 @@ Hibernate 使用代理和集合封装器来实现懒加载。
 
 
 [A Guide to Spring’s Open Session in View](https://www.baeldung.com/spring-open-session-in-view)
+
 [Quick Guide to Hibernate enable_lazy_load_no_trans](https://www.baeldung.com/hibernate-lazy-loading-workaround)
+
 [Spring Data JPA and Named Entity Graphs](https://www.baeldung.com/spring-data-jpa-named-entity-graphs)

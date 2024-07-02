@@ -92,6 +92,7 @@ Spring BootActuaor 中的每个端点或多或少会有一些属于自己的配�
 根据 `InfoEndpointAutoConfiguration` 可以得知，`InfoEndpoint` 中会注入 Spring 上下文中的所有 `InfoContributor` Bean实例。`InfoContributorAutoConfiguration` 自动注册了env、git、build这几个`InfoContributor`。
 
 Spring Boot Actuator 提供的 `InfoContributor` 列表如表：
+
 | 类名 | 默认开启 | 说明 |
 |-|-|-|
 | BuildInfoContributor | 是 | 提供BuildProperties 的信息，通过 spring.info.build来设置，默认读取META-INF/build-info.properties |
@@ -119,6 +120,7 @@ public class ActuatorInfoConfig {
 健康检查主要是依赖 `HealthIndicator` 的各种实现来完成的。Spring Boot Actuator 内置了近20种不同的实现，其中大部分都是针对系统的各种组件的健康检查，例如，数据库、缓存、消息队列等。
 
 以下是常见的一些`HealthIndicator`实现：
+
 | 实现类 | 说明 |
 |-|-|
 | DataSourceHealthIndicator | 检查 Spring 上下文中能取到的所有 DataSource 是否健康 |
@@ -226,6 +228,7 @@ MicroMeter 是一个应用程序度量工具，它提供了一种简单的方式
 Micrometer 通过 Meter 接口来收集系统的度量数据，由 MeterRegistry 来创建并管理 Meter。Micrometer 支持的各种监控系统都有自己的 MeterRegistry 实现。
 
 内置的Meter 实现分为几种：
+
 | Meter类型 | 说明 |
 |-|-|
 | Timer | 计时器，用来记录一个事件的耗时 |
@@ -240,6 +243,7 @@ Micrometer 通过 Meter 接口来收集系统的度量数据，由 MeterRegistry
 Spring Boot Actuator 中提供了 metrics 端点，通过 `/actuator/metrics` 我们可以获取系统的度量值。而且 Spring Boot 还内置了很多实用的指标，可以直接拿来使用。
 
 以下是Micrometer 本身支持的JVM 相关指标：
+
 | 度量指标 | 说明 |
 |-|-|
 | ClassLoaderMetrics | 收集加载和卸载的类信息 |

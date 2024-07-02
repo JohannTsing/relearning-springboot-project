@@ -282,7 +282,7 @@ Spring Boot 的`JpaRepositoriesAutoConfiguration` 提供了 `JpaRepository` 相�
 Spring Data 查询方法支持的关键词:
 
 | 作用 | 关键词 | 示例 | SQL对应 |
-|----|----|----|
+|----|----|----|----|
 | 相等 | Is、Equals，不写的话默认就是相等 | findByNameIs(String name) | … where x.name = ? |
 | 比较 | LessThan、LessThanEqual、GreaterThan、GreaterThanEqual | findByAgeLessThan(int age) | … where x.age < ? |
 | 比较 | Between，可用于日期时间的比较 | findByStartDateBetween(Date d1, Date d2) | … where x.startDate between ? and ? |
@@ -294,6 +294,7 @@ Spring Data 查询方法支持的关键词:
 | 集合 | In、NotIn | findByAgeIn(Collection ages) | … where x.age in ? |
 | 布尔判断 | True、False | findByActiveTrue() | … where x.active = true |
 | 排序 | OrderBy | findByNameOrderByAgeDescName(String name) | … where x.name = ? order by x.age desc, x.name |
+
 > 排序的时候，也可以在参数中添加一个 Sort 类型的参数灵活地传入期望的排序方式：
 > Sort sort = Sort.by("name").descending().and(Sort.by("id").ascending());
 
